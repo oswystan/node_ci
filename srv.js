@@ -15,14 +15,15 @@ function main() {
     var express = require('express');
     var app = express();
     var process = require('child_process');
+    var log = require("log4js").getLogger("ci");
 
     app.get("/adb/:cmd", function(req, res) {
         var cmd = "adb " + req.params.cmd;
-        console.log("=>"+cmd);
+        log.info("=>"+cmd);
         process.exec(cmd, function (err, stdout, stderr) {
             res.send(stdout);
         });
-        console.log("=>DONE");
+        log.info("=>DONE");
     });
 
     app.get("/build/:prod", function(req, res) {
@@ -33,29 +34,31 @@ function main() {
         };
 
         if (req.params.prod != "x10" && req.params.prod != "turbo") {
-            res.send("invalid product " + req.params.prod);
+            res.send("invalid product " + req.params.prod + "\n");
+            log.error("invalid product " + req.params.prod);
             return;
         }
         res.send("build " + req.params.prod + "\n");
-        console.log("=>product " + req.params.prod);
-        console.log("=>do get.sh");
+        log.info("=>product " + req.params.prod);
+        log.info("=>do get.sh");
         var cmd = process.spawnSync("./get.sh", opts);
         if (cmd.status != 0) {
             return;
         }
-        console.log("=>do flash.sh");
+        log.info("=>do flash.sh");
         cmd = process.spawnSync("./flash.sh", opts);
         if (cmd.status != 0) {
             return;
         }
-        console.log("=>do first.sh");
+        log.info("=>do first.sh");
         cmd = process.spawnSync("./first.sh", opts);
         if (cmd.status != 0) {
             return;
         }
-        console.log("=>DONE");
+        log.info("=>DONE");
     });
 
+    log.info("ci server started");
     app.listen(8080);
 }
 
