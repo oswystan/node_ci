@@ -35,7 +35,6 @@ function main() {
 
         if (req.params.prod != "x10" && req.params.prod != "turbo") {
             res.send("invalid product " + req.params.prod + "\n");
-            log.error("invalid product " + req.params.prod);
             return;
         }
         res.send("build " + req.params.prod + "\n");
